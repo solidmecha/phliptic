@@ -29,6 +29,7 @@ public class BotScript : MonoBehaviour {
            int r= GameControl.singleton.RNG.Next(AvailablePieces.Count);
             Vector2 v = Locs[GameControl.singleton.RNG.Next(Locs.Count)];
             hit = Physics2D.Raycast(v, Vector2.zero);
+            AvailablePieces[r].Tile = hit.collider.GetComponent<TileScript>();
             hit.collider.enabled = false;
             AvailablePieces[r].transform.position = v;
             AvailablePieces[r].inHand = false;

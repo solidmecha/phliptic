@@ -7,13 +7,24 @@ public class PieceScript : MonoBehaviour {
     public int[] Values; //top bottom Left Right
     public int[] Specials;
     public bool inHand;
+    public TileScript Tile;
 
     public void Fight(PieceScript P, int index)
     {
-        if(Values[index]>=P.Values[GameControl.singleton.FightIndex[index]])
+        if (Values[index] != -1 && P.Values[GameControl.singleton.FightIndex[index]] != -1)
         {
+            if (Values[index] == P.Values[GameControl.singleton.FightIndex[index]] && GameControl.singleton.AtkTiebreak)
+            {
                 P.Flip();
-            GameControl.singleton.HandlePlacement(P);
+                if (GameControl.singleton.ComboChain)
+                    GameControl.singleton.HandlePlacement(P);
+            }
+            else if (Values[index] > P.Values[GameControl.singleton.FightIndex[index]])
+            {
+                P.Flip();
+                if (GameControl.singleton.ComboChain)
+                    GameControl.singleton.HandlePlacement(P);
+            }
         }
     }
 
@@ -22,8 +33,15 @@ public class PieceScript : MonoBehaviour {
         for (int i = 0; i < Values.Length; i++)
         {
             Values[i] = vals[i];
-            transform.GetChild(1).GetChild(i).GetComponent<UnityEngine.UI.Text>().text = Values[i].ToString() + GameControl.singleton.SpecialChar(Specials[i]);
+            if(Values[i]>0)
+                transform.GetChild(1).GetChild(i).GetComponent<UnityEngine.UI.Text>().text = Values[i].ToString() + GameControl.singleton.SpecialChar(Specials[i]);
          }
+    }
+
+    public void ReplaceTile(TileScript T)
+    {
+        Tile.GetComponent<BoxCollider2D>().enabled = true;
+        Tile = T;
     }
 
     public void Flip()
