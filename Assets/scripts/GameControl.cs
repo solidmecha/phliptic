@@ -62,7 +62,7 @@ public class GameControl : MonoBehaviour {
             {
                 Instantiate(Tile, (Vector2)transform.position + new Vector2(x * TileOffsetCoefficient, y * TileOffsetCoefficient), Quaternion.identity);
                 int r = RNG.Next(SpriteIndex.Count);
-                MakePiece(r, (Vector2)transform.position + new Vector2(-8, 0) + new Vector2(x * TileOffsetCoefficient, y * TileOffsetCoefficient));
+                MakePiece(SpriteIndex[r], (Vector2)transform.position + new Vector2(-8, 0) + new Vector2(x * TileOffsetCoefficient, y * TileOffsetCoefficient));
                 SpriteIndex.RemoveAt(r);
             }
         }
@@ -142,6 +142,7 @@ public class GameControl : MonoBehaviour {
                                 {
                                     HitPiece.transform.position = hit.collider.transform.position;
                                     HitPiece.ReplaceTile(hit.collider.GetComponent<TileScript>());
+                                    hit.collider.enabled = false;
                                     HandlePlacement(HitPiece);
                                 }
                                 break;
@@ -206,18 +207,29 @@ public class GameControl : MonoBehaviour {
 #if UNITY_ANDROID
     if (Input.touchCount==0 && CurrentState==GameState.MovingPiece)
         {
-            if(SelectedTile != null)
+            if (SelectedTile != null)
             {
 
                 CurrentState = GameState.FX;
+                SelectedPiece.Tile = SelectedTile;
                 SelectedTile.GetComponent<BoxCollider2D>().enabled = false;
                 SelectedPiece.transform.position = SelectedTile.transform.position;
                 SelectedPiece.GetComponent<BoxCollider2D>().enabled = true;
-                HandlePlacement(SelectedPiece);
                 SelectedPiece.inHand = false;
-                SelectedPiece.isBlue = true;
-                SelectedPiece.GetComponent<SpriteRenderer>().color=SideColors[0];
-                Invoke("NextTurn", .5f);
+                SelectedPiece.isBlue = blueTurn;
+                HandlePlacement(SelectedPiece);
+                SelectedPiece.GetComponent<SpriteRenderer>().color = SideColors[PlayerColor];
+                if (hasBot)
+                    Invoke("NextTurn", .5f);
+                else
+                {
+                    blueTurn = !blueTurn;
+                    CurrentState = GameState.PlayerTurn;
+                    if (blueTurn)
+                        PlayerColor = 0;
+                    else
+                        PlayerColor = 1;
+                }
                 SelectedTile = null;
                 SelectedPiece = null;
             }
